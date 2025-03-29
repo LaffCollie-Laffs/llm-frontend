@@ -22,16 +22,16 @@
 
   <textarea id="prompt" rows="6" cols="60" placeholder="Enter your prompt here..."></textarea><br/>
   <button onclick="sendPrompt()">Submit</button>
-  <button onclick="resetFields()">Reset</button>
 
   <h3>Response:</h3>
   <pre id="response"></pre>
+
+  <button onclick="resetFields()">Reset</button>
 
   <script>
     async function sendPrompt() {
       const prompt = document.getElementById("prompt").value;
       const provider = document.getElementById("provider").value;
-
       const responseEl = document.getElementById("response");
       responseEl.textContent = "Loading...";
 
@@ -45,7 +45,8 @@
         });
 
         const data = await res.json();
-        responseEl.textContent = JSON.stringify(data, null, 2);
+        const message = data.choices?.[0]?.message?.content || "No response.";
+        responseEl.textContent = message;
       } catch (err) {
         responseEl.textContent = "Error: " + err.message;
       }
