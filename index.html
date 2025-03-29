@@ -24,8 +24,7 @@
   <button onclick="sendPrompt()">Submit</button>
 
   <h3>Response:</h3>
-  <pre id="response"></pre>
-
+  <textarea id="response" rows="4" cols="60" readonly style="resize: vertical;"></textarea><br/>
   <button onclick="resetFields()">Reset</button>
 
   <script>
@@ -33,7 +32,8 @@
       const prompt = document.getElementById("prompt").value;
       const provider = document.getElementById("provider").value;
       const responseEl = document.getElementById("response");
-      responseEl.textContent = "Loading...";
+      responseEl.value = "Loading...";
+      responseEl.style.height = "auto";
 
       try {
         const res = await fetch("https://api.chaudhurisolutions.com/prompt", {
@@ -46,15 +46,21 @@
 
         const data = await res.json();
         const message = data.choices?.[0]?.message?.content || "No response.";
-        responseEl.textContent = message;
+        responseEl.value = message;
+        responseEl.style.height = "auto";
+        responseEl.style.height = responseEl.scrollHeight + "px";
       } catch (err) {
-        responseEl.textContent = "Error: " + err.message;
+        responseEl.value = "Error: " + err.message;
+        responseEl.style.height = "auto";
+        responseEl.style.height = responseEl.scrollHeight + "px";
       }
     }
 
     function resetFields() {
       document.getElementById("prompt").value = "";
-      document.getElementById("response").textContent = "";
+      const responseEl = document.getElementById("response");
+      responseEl.value = "";
+      responseEl.style.height = "auto";
       document.getElementById("prompt").focus();
     }
   </script>
