@@ -1,3 +1,9 @@
+# macOS and editor artifacts
 .DS_Store
+
+# Node dependencies (if you ever add JS tooling)
 node_modules/
+
+# Build output (if you start bundling)
 dist/
+
