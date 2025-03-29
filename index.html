@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LLM Prompt Tester</title>
+</head>
+<body>
+  <h1>LLM Prompt Tester</h1>
+
+  <label for="provider">Choose a provider:</label>
+  <select id="provider">
+    <option value="openai">OpenAI</option>
+    <!--
+    <option value="anthropic">Anthropic</option>
+    <option value="mistral">Mistral</option>
+    <option value="together">Together.ai</option>
+    -->
+  </select>
+
+  <br /><br />
+
+  <textarea id="prompt" rows="6" cols="60" placeholder="Enter your prompt here..."></textarea><br/>
+  <button onclick="sendPrompt()">Submit</button>
+  <button onclick="resetFields()">Reset</button>
+
+  <h3>Response:</h3>
+  <pre id="response"></pre>
+
+  <script>
+    async function sendPrompt() {
+      const prompt = document.getElementById("prompt").value;
+      const provider = document.getElementById("provider").value;
+
+      const responseEl = document.getElementById("response");
+      responseEl.textContent = "Loading...";
+
+      try {
+        const res = await fetch("https://api.chaudhurisolutions.com/prompt", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ prompt, provider })
+        });
+
+        const data = await res.json();
+        responseEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        responseEl.textContent = "Error: " + err.message;
+      }
+    }
+
+    function resetFields() {
+      document.getElementById("prompt").value = "";
+      document.getElementById("response").textContent = "";
+      document.getElementById("prompt").focus();
+    }
+  </script>
+</body>
+</html>
