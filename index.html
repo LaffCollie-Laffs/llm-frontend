@@ -37,7 +37,8 @@
         const res = await fetch("https://api.chaudhurisolutions.com/prompt", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer llm-secret-gooboy-smithie-2019" 
           },
           body: JSON.stringify({ prompt, provider })
         });
