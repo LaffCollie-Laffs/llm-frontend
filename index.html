@@ -43,7 +43,7 @@
         });
 
         const data = await res.json();
-        const message = data.choices?.[0]?.message?.content || "No response.";
+        const message = data.output || "No response.";
         responseEl.value = message;
         responseEl.style.height = "auto";
         responseEl.style.height = responseEl.scrollHeight + "px";
