@@ -16,8 +16,6 @@
     <option value="together">Together.ai</option>
   </select>
 
-  <div id="usage-warning" style="margin-top: 10px; font-weight: bold;"></div>
-
   <br /><br />
 
   <textarea id="prompt" rows="6" cols="60" placeholder="Enter your prompt here..."></textarea><br/>
@@ -26,6 +24,9 @@
   <h3>Response:</h3>
   <textarea id="response" rows="4" cols="60" readonly style="resize: vertical;"></textarea><br/>
   <button onclick="resetFields()">Reset</button>
+
+  <h3>Usage Summary:</h3>
+  <div id="usage-summary" style="font-family: monospace; white-space: pre-line;"></div>
 
   <script>
     const apiBase = "https://api.chaudhurisolutions.com";
@@ -53,7 +54,8 @@
         responseEl.value = message;
         responseEl.style.height = "auto";
         responseEl.style.height = responseEl.scrollHeight + "px";
-        updateUsageWarnings(); // refresh usage after each call
+
+        updateUsageDashboard(); // refresh usage after submission
       } catch (err) {
         responseEl.value = "Error: " + err.message;
         responseEl.style.height = "auto";
@@ -69,10 +71,9 @@
       document.getElementById("prompt").focus();
     }
 
-    async function updateUsageWarnings() {
-      const provider = document.getElementById("provider").value;
-      const warningDiv = document.getElementById("usage-warning");
-      warningDiv.textContent = "";
+    async function updateUsageDashboard() {
+      const dashboard = document.getElementById("usage-summary");
+      dashboard.textContent = "Loading usage data...";
 
       try {
         const [usageRes, quotaRes] = await Promise.all([
@@ -88,26 +89,43 @@
         const quotaData = await quotaRes.json();
 
         const today = new Date().toISOString().slice(0, 10);
-        const used = usageData.usage?.[today]?.[provider] || 0;
-        const limit = quotaData.quotas?.[provider] || null;
+        const usage = usageData.usage?.[today] || {};
+        const quotas = quotaData.quotas || {};
 
-        if (limit && used >= limit * 0.8) {
-          warningDiv.textContent = `⚠️ ${provider} usage is at ${used}/${limit} (${Math.round((used / limit) * 100)}%)`;
-          warningDiv.style.color = "red";
-        } else if (limit) {
-          warningDiv.textContent = `${provider} usage: ${used}/${limit}`;
-          warningDiv.style.color = "gray";
+        const providerNames = {
+          openai: "🧠 OpenAI",
+          anthropic: "🤖 Anthropic",
+          mistral: "⚡ Mistral",
+          together: "🔁 Together.ai"
+        };
+
+        let output = "";
+        let total = 0;
+
+        for (const provider of Object.keys(providerNames)) {
+          const used = usage[provider] || 0;
+          const limit = quotas[provider] || "N/A";
+          const emoji = providerNames[provider];
+          const plural = used === 1 ? "" : "s";
+
+          output += `${emoji} — ${used} / ${limit} request${plural}\n`;
+          if (limit !== "N/A" && used >= limit * 0.8) {
+            output += `⚠️  ${provider} usage is at ${used}/${limit} (${Math.round((used / limit) * 100)}%)\n`;
+          }
+
+          if (typeof used === "number") total += used;
         }
 
+        output += `\n🧾 Total requests today: ${total}`;
+        dashboard.textContent = output;
+
       } catch (err) {
-        warningDiv.textContent = "⚠️ Usage info unavailable.";
-        warningDiv.style.color = "orange";
+        dashboard.textContent = "⚠️ Could not load usage data.";
       }
     }
 
     window.onload = () => {
-      updateUsageWarnings();
-      document.getElementById("provider").addEventListener("change", updateUsageWarnings);
+      updateUsageDashboard();
     };
   </script>
 </body>
