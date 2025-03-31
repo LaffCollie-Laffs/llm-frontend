@@ -16,6 +16,8 @@
     <option value="together">Together.ai</option>
   </select>
 
+  <div id="usage-warning" style="margin-top: 10px; font-weight: bold;"></div>
+
   <br /><br />
 
   <textarea id="prompt" rows="6" cols="60" placeholder="Enter your prompt here..."></textarea><br/>
@@ -26,6 +28,9 @@
   <button onclick="resetFields()">Reset</button>
 
   <script>
+    const apiBase = "https://api.chaudhurisolutions.com";
+    const token = "llm-secret-gooboy-smithie-2019";
+
     async function sendPrompt() {
       const prompt = document.getElementById("prompt").value;
       const provider = document.getElementById("provider").value;
@@ -34,11 +39,11 @@
       responseEl.style.height = "auto";
 
       try {
-        const res = await fetch("https://api.chaudhurisolutions.com/prompt", {
+        const res = await fetch(`${apiBase}/prompt`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer llm-secret-gooboy-smithie-2019" 
+            "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({ prompt, provider })
         });
@@ -48,6 +53,7 @@
         responseEl.value = message;
         responseEl.style.height = "auto";
         responseEl.style.height = responseEl.scrollHeight + "px";
+        updateUsageWarnings(); // refresh usage after each call
       } catch (err) {
         responseEl.value = "Error: " + err.message;
         responseEl.style.height = "auto";
@@ -62,6 +68,47 @@
       responseEl.style.height = "auto";
       document.getElementById("prompt").focus();
     }
+
+    async function updateUsageWarnings() {
+      const provider = document.getElementById("provider").value;
+      const warningDiv = document.getElementById("usage-warning");
+      warningDiv.textContent = "";
+
+      try {
+        const [usageRes, quotaRes] = await Promise.all([
+          fetch(`${apiBase}/usage`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          fetch(`${apiBase}/quotas`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+
+        const usageData = await usageRes.json();
+        const quotaData = await quotaRes.json();
+
+        const today = new Date().toISOString().slice(0, 10);
+        const used = usageData.usage?.[today]?.[provider] || 0;
+        const limit = quotaData.quotas?.[provider] || null;
+
+        if (limit && used >= limit * 0.8) {
+          warningDiv.textContent = `⚠️ ${provider} usage is at ${used}/${limit} (${Math.round((used / limit) * 100)}%)`;
+          warningDiv.style.color = "red";
+        } else if (limit) {
+          warningDiv.textContent = `${provider} usage: ${used}/${limit}`;
+          warningDiv.style.color = "gray";
+        }
+
+      } catch (err) {
+        warningDiv.textContent = "⚠️ Usage info unavailable.";
+        warningDiv.style.color = "orange";
+      }
+    }
+
+    window.onload = () => {
+      updateUsageWarnings();
+      document.getElementById("provider").addEventListener("change", updateUsageWarnings);
+    };
   </script>
 </body>
 </html>
