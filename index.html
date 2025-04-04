@@ -22,6 +22,7 @@
     <option value="">Default</option>
   </select>
   <!-- 📌 Add this right after the model dropdown -->
+  <div id="current-provider-label"><strong>Current provider:</strong> OpenAI</div>
   <div id="current-model-label"><strong>Current model:</strong> Default</div>
   <br /><br />
 
@@ -62,7 +63,10 @@
       const provider = document.getElementById("provider");
       const modelSelect = document.getElementById("model");
       const modelLabel = document.getElementById("current-model-label");
-  
+      const providerLabel = document.getElementById("current-provider-label");
+      if (providerLabel) {
+        providerLabel.innerHTML = `<strong>Current provider:</strong> ${selected.charAt(0).toUpperCase() + selected.slice(1)}`;
+      }
       if (!provider || !modelSelect || !modelLabel) {
         console.error("❌ One or more required elements not found!");
         return;
@@ -73,7 +77,8 @@
   
       const models = modelsByProvider[selected] || [];
       const defaultModel = defaultModelByProvider[selected] || "N/A";
-  
+
+      providerLabel.innerHTML = `<strong>Current provider:</strong> ${selected.charAt(0).toUpperCase() + selected.slice(1)}`;
       modelSelect.innerHTML = '<option value="">Default</option>';
       for (const model of models) {
         const option = document.createElement("option");
