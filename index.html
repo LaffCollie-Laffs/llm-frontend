@@ -35,7 +35,6 @@
   <div id="usage-summary" style="font-family: monospace; white-space: pre-line;"></div>
 
   <script>
-    alert("✅ index.html JS loaded correctly");
 
     const apiBase = "https://api.chaudhurisolutions.com";
     const token = "llm-secret-gooboy-smithie-2019";
@@ -67,7 +66,6 @@
       for (const model of models) {
         const option = document.createElement("option");
         option.value = model;
-        option.textContent = model;
         modelSelect.appendChild(option);
       }
     }
