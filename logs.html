@@ -78,9 +78,7 @@
     async function fetchLogs() {
       try {
         const res = await fetch("https://api.chaudhurisolutions.com/logs", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
 
         console.log("✅ Response status:", res.status);
@@ -89,8 +87,8 @@
 
         allLogs = data.logs.flatMap(line => {
           try {
-            return [JSON.parse(line)];
-          } catch (e) {
+            return JSON.parse(line);
+          } catch {
             console.warn("❗ Invalid log line:", line);
             return [];
           }
@@ -107,16 +105,16 @@
     function updateModelFilterOptions() {
       const modelFilter = document.getElementById("modelFilter");
       const models = [...new Set(allLogs.map(log => log.model).filter(Boolean))].sort();
-      modelFilter.innerHTML = '<option value="">All</option>' + models.map(model => `<option value="${model}">${model}</option>`).join("");
+      modelFilter.innerHTML = '<option value="">All</option>' + models.map(m => `<option value="${m}">${m}</option>`).join("");
     }
 
     function renderLogs() {
       const container = document.getElementById("logs");
-      const provider = document.getElementById("providerFilter").value;
-      const model = document.getElementById("modelFilter").value;
-      const keyword = document.getElementById("keyword").value.toLowerCase();
-      const start = document.getElementById("startDate").value;
-      const end = document.getElementById("endDate").value;
+      const provider = document.getElementById("providerFilter")?.value || "";
+      const model = document.getElementById("modelFilter")?.value || "";
+      const keyword = document.getElementById("keyword")?.value.toLowerCase() || "";
+      const start = document.getElementById("startDate")?.value || "";
+      const end = document.getElementById("endDate")?.value || "";
 
       container.innerHTML = "";
 
@@ -142,9 +140,7 @@
         const isLong = log.output.length > 300;
 
         div.innerHTML = `
-          <div class="meta">
-            ${log.timestamp} | ${log.provider} | ${log.model}
-          </div>
+          <div class="meta">${log.timestamp} | ${log.provider} | ${log.model}</div>
           <div><strong>Prompt:</strong> ${log.prompt}</div>
           <div class="output"><strong>Output:</strong>
             <div class="text">${shortOutput}</div>
@@ -152,38 +148,33 @@
           </div>
         `;
 
-if (isLong) {
-  const btn = div.querySelector(".toggle");
-  const textDiv = div.querySelector(".text");
-
-  if (btn && textDiv) {
-    btn.addEventListener("click", () => {
-      if (btn.textContent.includes("more")) {
-        textDiv.textContent = log.output;
-        btn.textContent = "Show less";
-      } else {
-        textDiv.textContent = shortOutput;
-        btn.textContent = "Show more";
-      }
-    });
-  } else {
-    console.warn("⚠️ Could not find toggle button or text div for expandable output.");
-  }
-}
+        const btn = div.querySelector(".toggle");
+        const textDiv = div.querySelector(".text");
+        if (btn && textDiv) {
+          btn.addEventListener("click", () => {
+            if (btn.textContent.includes("more")) {
+              textDiv.textContent = log.output;
+              btn.textContent = "Show less";
+            } else {
+              textDiv.textContent = shortOutput;
+              btn.textContent = "Show more";
+            }
+          });
+        }
 
         container.appendChild(div);
       }
     }
 
     window.onload = () => {
-      const ids = ["providerFilter", "modelFilter", "startDate", "endDate", "keyword"];
-      ids.forEach(id => {
+      const filters = ["providerFilter", "modelFilter", "startDate", "endDate", "keyword"];
+      filters.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          console.log(`✅ Found element: #${id}`);
+          console.log("✅ Found element:", `#${id}`);
           el.addEventListener("input", renderLogs);
         } else {
-          console.warn(`⚠️ Element not found: #${id}`);
+          console.warn("⚠️ Missing element:", id);
         }
       });
 
