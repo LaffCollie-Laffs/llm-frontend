@@ -35,6 +35,8 @@
   <div id="usage-summary" style="font-family: monospace; white-space: pre-line;"></div>
 
   <script>
+    alert("✅ index.html JS loaded correctly");
+
     const apiBase = "https://api.chaudhurisolutions.com";
     const token = "llm-secret-gooboy-smithie-2019";
 
@@ -50,9 +52,17 @@
     };
 
     function updateModelDropdown() {
-      const provider = document.getElementById("provider").value;
+      const provider = document.getElementById("provider");
       const modelSelect = document.getElementById("model");
-      const models = modelsByProvider[provider] || [];
+      if (!provider || !modelSelect) {
+        console.error("❌ One or both select elements not found!");
+        return;
+      }
+
+      const selected = provider.value;
+      console.log("🔄 Selected provider:", selected);
+
+      const models = modelsByProvider[selected] || [];
       modelSelect.innerHTML = '<option value="">Default</option>';
       for (const model of models) {
         const option = document.createElement("option");
@@ -88,6 +98,7 @@
 
         updateUsageDashboard();
       } catch (err) {
+        console.error("❌ Error submitting prompt:", err);
         responseEl.value = "Error: " + err.message;
         responseEl.style.height = "auto";
         responseEl.style.height = responseEl.scrollHeight + "px";
@@ -152,16 +163,23 @@
         dashboard.textContent = output;
 
       } catch (err) {
+        console.error("❌ Error loading usage:", err);
         dashboard.textContent = "⚠️ Could not load usage data.";
       }
     }
 
     window.onload = () => {
+      console.log("🚀 Page fully loaded");
       updateModelDropdown();
       updateUsageDashboard();
     };
 
-    document.getElementById("provider").addEventListener("change", updateModelDropdown);
+    const providerEl = document.getElementById("provider");
+    if (providerEl) {
+      providerEl.addEventListener("change", updateModelDropdown);
+    } else {
+      console.warn("⚠️ No #provider element found!");
+    }
   </script>
 
   <hr />

@@ -173,14 +173,21 @@
     }
 
     // ✅ Safely attach listeners only if elements exist
-    ["providerFilter", "modelFilter", "startDate", "endDate", "keyword"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener("input", renderLogs);
-      } else {
-        console.warn(`⚠️ Element with ID '${id}' not found`);
-      }
-    });
+alert("✅ logs.html is up to date and JS is running!");
+
+["providerFilter", "modelFilter", "startDate", "endDate", "keyword"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    console.log(`✅ Found element: #${id}`);
+    el.addEventListener("input", renderLogs);
+  } else {
+    console.warn(`⚠️ Element with ID '${id}' not found`);
+    const marker = document.createElement("div");
+    marker.textContent = `⚠️ Missing element: ${id}`;
+    marker.style.color = "red";
+    document.body.appendChild(marker);
+  }
+});
 
     fetchLogs();
   </script>
