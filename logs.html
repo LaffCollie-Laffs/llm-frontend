@@ -152,19 +152,24 @@
           </div>
         `;
 
-        if (isLong) {
-          const btn = div.querySelector(".toggle");
-          const textDiv = div.querySelector(".text");
-          btn.addEventListener("click", () => {
-            if (btn.textContent.includes("more")) {
-              textDiv.textContent = log.output;
-              btn.textContent = "Show less";
-            } else {
-              textDiv.textContent = shortOutput;
-              btn.textContent = "Show more";
-            }
-          });
-        }
+if (isLong) {
+  const btn = div.querySelector(".toggle");
+  const textDiv = div.querySelector(".text");
+
+  if (btn && textDiv) {
+    btn.addEventListener("click", () => {
+      if (btn.textContent.includes("more")) {
+        textDiv.textContent = log.output;
+        btn.textContent = "Show less";
+      } else {
+        textDiv.textContent = shortOutput;
+        btn.textContent = "Show more";
+      }
+    });
+  } else {
+    console.warn("⚠️ Could not find toggle button or text div for expandable output.");
+  }
+}
 
         container.appendChild(div);
       }
