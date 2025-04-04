@@ -76,27 +76,41 @@
     let allLogs = [];
 
     async function fetchLogs() {
-      try {
-        const res = await fetch("https://api.chaudhurisolutions.com/logs", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        const data = await res.json();
-        allLogs = data.logs.reverse().map(line => {
-          try {
-            return JSON.parse(line);
-          } catch {
-            return null;
-          }
-        }).filter(Boolean);
-
-        updateModelFilterOptions();
-        renderLogs();
-      } catch (err) {
-        document.getElementById("logs").textContent = "Failed to load logs.";
+  try {
+    const res = await fetch("https://api.chaudhurisolutions.com/logs", {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        Authorization: `Bearer ${token}`
       }
+    });
+
+    console.log("✅ Response status:", res.status);
+
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}`);
     }
+
+    const data = await res.json();
+    console.log("📦 Fetched data:", data);
+
+    allLogs = data.logs.reverse().map(line => {
+      try {
+        return JSON.parse(line);
+      } catch (e) {
+        console.warn("❗ Invalid log line:", line);
+        return null;
+      }
+    }).filter(Boolean);
+
+    updateModelFilterOptions();
+    renderLogs();
+  } catch (err) {
+    console.error("❌ Fetch error:", err);
+    document.getElementById("logs").textContent = "Failed to load logs.";
+  }
+}
+
 
     function updateModelFilterOptions() {
       const modelFilter = document.getElementById("modelFilter");
