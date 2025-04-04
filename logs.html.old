@@ -84,17 +84,19 @@
         });
 
         console.log("✅ Response status:", res.status);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const data = await res.json();
         console.log("📦 Fetched data:", data);
 
-        allLogs = data.logs.flatMap(line => {
+        allLogs = data.logs.reverse().map(line => {
           try {
-            return [JSON.parse(line)];
-          } catch (e) {
+            return JSON.parse(line);
+          } catch {
             console.warn("❗ Invalid log line:", line);
-            return [];
+            return null;
           }
-        });
+        }).filter(Boolean);
 
         updateModelFilterOptions();
         renderLogs();
@@ -170,20 +172,24 @@
       }
     }
 
-    window.onload = () => {
-      const ids = ["providerFilter", "modelFilter", "startDate", "endDate", "keyword"];
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          console.log(`✅ Found element: #${id}`);
-          el.addEventListener("input", renderLogs);
-        } else {
-          console.warn(`⚠️ Element not found: #${id}`);
-        }
-      });
+    // ✅ Safely attach listeners only if elements exist
+alert("✅ logs.html is up to date and JS is running!");
 
-      fetchLogs();
-    };
+["providerFilter", "modelFilter", "startDate", "endDate", "keyword"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    console.log(`✅ Found element: #${id}`);
+    el.addEventListener("input", renderLogs);
+  } else {
+    console.warn(`⚠️ Element with ID '${id}' not found`);
+    const marker = document.createElement("div");
+    marker.textContent = `⚠️ Missing element: ${id}`;
+    marker.style.color = "red";
+    document.body.appendChild(marker);
+  }
+});
+
+    fetchLogs();
   </script>
 </body>
 </html>
